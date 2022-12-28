@@ -3,10 +3,9 @@ import copy
 
 from google.protobuf.json_format import MessageToDict
 from spaceone.core import pygrpc, utils
-from conf import *
 
 
-class RepositoryResources:
+class SyncResource:
 
     def __init__(self, external_conf_path=None):
         if external_conf_path:
@@ -162,7 +161,7 @@ class RepositoryResources:
 
 if __name__ == '__main__':
     external_conf_path = '/Users/seolmin/.spaceone/environments/marketplace-contents.yml'
-    repository = RepositoryResources(external_conf_path=external_conf_path)
+    repository = SyncResource(external_conf_path=external_conf_path)
     variables = repository.create_marketplace_variables()
 
     repository.create_resources_to_local_repository(variables)
