@@ -76,7 +76,9 @@ class RepositoryResources:
 
     def _create_plugins(self, plugins):
         for plugin in plugins:
-            params = copy.deepcopy(plugin)
+            params = {
+
+            }
             self.client.Plugin.register(params, metadata=self._get_metadata())
 
     def _delete_schemas(self, repository_id):
