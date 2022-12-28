@@ -1,5 +1,3 @@
-## !/usr/bin/env python3
-
 import os
 import copy
 
@@ -34,8 +32,6 @@ class RepositoryResources:
                              'plugin': plugins}}
 
         utils.save_yaml_to_file(variables, 'repository_resources_vars.yml')
-
-        # TODO: make sync file
 
         return variables
 
