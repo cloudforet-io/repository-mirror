@@ -159,6 +159,15 @@ class SyncResource:
         return (('token', self.api_key),)
 
 
+def run_sync_repo(file_path):
+    print(file_path)
+    repository = SyncResource(external_conf_path=file_path)
+    variables = repository.create_marketplace_variables()
+
+    repository.create_resources_to_local_repository(variables)
+    # repository.delete_resources_to_local_repository()
+
+
 if __name__ == '__main__':
     external_conf_path = '/Users/seolmin/.spaceone/environments/marketplace-contents.yml'
     repository = SyncResource(external_conf_path=external_conf_path)
