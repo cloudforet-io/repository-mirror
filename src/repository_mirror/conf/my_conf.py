@@ -1,6 +1,7 @@
 import os
 from spaceone.core import utils
 from repository_mirror.conf.global_conf import *
+from repository_mirror.conf import default_conf
 
 
 def get_config(key=None, default=None, environment=None):
@@ -120,3 +121,16 @@ def list_resources(key, environment=None):
         result.append((resource,))
 
     return result
+
+
+def set_default_config():
+    configs = {}
+    for key in dir(default_conf):
+        if not key.startswith('__'):
+            configs.update({key: eval(f'default_conf.{key}')})
+    return configs
+
+
+if __name__ == '__main__':
+    set_default_config()
+    # test()

@@ -1,7 +1,7 @@
 import click
 from repository_mirror.lib.output import print_data
-from repository_mirror.conf.global_conf import DEFAULT_ENVIRONMENT
 from repository_mirror.conf.my_conf import *
+from repository_mirror.conf.default_conf import *
 
 __all__ = ['cli']
 
@@ -27,7 +27,8 @@ def init(environment, import_file):
     if import_file:
         import_config(import_file, environment)
     else:
-        set_config({}, environment)
+        default_configs = set_default_config()
+        set_config(default_configs, environment)
 
 
 @config.command()
