@@ -263,3 +263,124 @@ def show(output):
     """Display resource_types"""
     resource_types = list_resources('sync_resource_type')
     print_data(resource_types, output, headers=['sync_resource_type'])
+
+
+@config.group()
+def origin():
+    """
+    Manage origin repository
+    """
+    pass
+
+
+@origin.group()
+def endpoint():
+    """
+    Manage endpoint of origin repository
+    """
+    pass
+
+
+@endpoint.command()
+@click.argument('endpoint')
+def upsert(endpoint):
+    """Add a specific endpoint"""
+    try:
+        origin_config = get_resource('origin')
+    except Exception:
+        origin_config = {}
+
+    if endpoint == origin_config['endpoint']:
+        raise ValueError(f"'{endpoint}' already exists.")
+
+    origin_config['endpoint'] = endpoint
+
+    set_resource('origin', origin_config)
+    click.echo(f"'{endpoint}' endpoint has been added.")
+
+
+@endpoint.command()
+@click.option('-o', '--output', default='table', help='Output format',
+              type=click.Choice(['table', 'json', 'yaml']), show_default=True)
+def show(output):
+    """Display endpoint of origin repository """
+    resource_types = list_inner_resources('origin')
+    print_data(resource_types, output, headers=['origin'])
+
+
+@config.group()
+def target():
+    """
+    Manage target repository
+    """
+    pass
+
+
+@target.group()
+def endpoint():
+    """
+    Manage endpoint of origin repository
+    """
+    pass
+
+
+@target.group()
+def api_key():
+    """
+    Manage api_key of origin repository
+    """
+    pass
+
+
+@endpoint.command()
+@click.argument('endpoint')
+def upsert(endpoint):
+    """Add a specific endpoint"""
+    try:
+        origin_config = get_resource('target')
+    except Exception:
+        origin_config = {}
+
+    if endpoint == origin_config['endpoint']:
+        raise ValueError(f"'{endpoint}' already exists.")
+
+    origin_config['endpoint'] = endpoint
+
+    set_resource('target', origin_config)
+    click.echo(f"'{endpoint}' endpoint has been added.")
+
+
+@endpoint.command()
+@click.option('-o', '--output', default='table', help='Output format',
+              type=click.Choice(['table', 'json', 'yaml']), show_default=True)
+def show(output):
+    """Display endpoint of origin repository """
+    resource_types = list_inner_resources('target')
+    print_data(resource_types, output, headers=['target'])
+
+
+@api_key.command()
+@click.argument('api_key')
+def upsert(api_key):
+    """Add a specific api_key"""
+    try:
+        origin_config = get_resource('target')
+    except Exception:
+        origin_config = {}
+
+    if api_key == origin_config['api_key']:
+        raise ValueError(f"'{api_key}' already exists.")
+
+    origin_config['api_key'] = api_key
+
+    set_resource('target', origin_config)
+    click.echo(f"'{api_key}' api_key has been added.")
+
+
+@api_key.command()
+@click.option('-o', '--output', default='table', help='Output format',
+              type=click.Choice(['table', 'json', 'yaml']), show_default=True)
+def show(output):
+    """Display api_key of origin repository """
+    resource_types = list_inner_resources('target')
+    print_data(resource_types, output, headers=['target'])
