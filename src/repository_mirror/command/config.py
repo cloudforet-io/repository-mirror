@@ -1,7 +1,6 @@
 import click
 from repository_mirror.lib.output import print_data
 from repository_mirror.conf.my_conf import *
-from repository_mirror.conf.default_conf import *
 
 __all__ = ['cli']
 
@@ -217,3 +216,50 @@ def show(output):
     """Display policies"""
     policies = list_resources('sync_policies')
     print_data(policies, output, headers=['sync_policies'])
+
+
+@config.group()
+def resource_type():
+    """
+    Manage resource_type to be synced.\n
+    Manage the resources corresponding to ['plugin', 'schema', 'policy']
+    """
+    pass
+
+
+@resource_type.command()
+@click.argument('resource_type')
+def add(resource_type):
+    """Add a specific resource_type"""
+    try:
+        resource_types = get_resource('sync_resource_type')
+    except Exception:
+        resource_types = []
+
+    if resource_type in resource_types:
+        raise ValueError(f"'{resource_type}' already exists.")
+
+    if resource_type not in MANAGED_RESOURCES:
+        raise ValueError(f"'{resource_type}' invalid repository resources")
+
+    resource_types.append(resource_type)
+
+    set_resource('sync_resource_type', resource_types)
+    click.echo(f"'{resource_type}' resource_type has been added.")
+
+
+@resource_type.command()
+@click.argument('resource_type')
+def remove(resource_type):
+    """Remove a specific resource_type"""
+    remove_resource('sync_resource_type', resource_type)
+    click.echo(f"'{resource_type}' resource_type has been removed.")
+
+
+@resource_type.command()
+@click.option('-o', '--output', default='table', help='Output format',
+              type=click.Choice(['table', 'json', 'yaml']), show_default=True)
+def show(output):
+    """Display resource_types"""
+    resource_types = list_resources('sync_resource_type')
+    print_data(resource_types, output, headers=['sync_resource_type'])

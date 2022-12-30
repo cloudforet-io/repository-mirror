@@ -10,3 +10,5 @@ ENVIRONMENT_CONF_PATH = os.path.join(CONFIG_DIR, 'environment.yml')
 ENVIRONMENT_DIR = os.path.join(CONFIG_DIR, 'environments')
 
 DEFAULT_ENVIRONMENT = 'default'
+
+MANAGED_RESOURCES = ['plugin', 'schema', 'policy']
