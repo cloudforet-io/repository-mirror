@@ -25,16 +25,6 @@ def cli():
     pass
 
 
-# @click.command(help=_help)
-@cli.command()
-# @click.argument('file_path')
-@click.option('-f', '--file', 'file_path', type=click.Path(exists=True), help='YAML file only')
-def all_resources(file_path):
-    print('yes')
-    # module = __import__(f'src.sync_resource', fromlist=['run_sync_repo'])
-    # getattr(module, 'run_sync_repo')(file_path)
-
-
 @cli.command()
 @click.argument('resource')
 @click.option('-j', '--json-parameter', help='JSON parameter')
@@ -43,7 +33,6 @@ def all_resources(file_path):
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
 def sync(resource, json_parameter, file_path, output):
     """Execute a method to resource"""
-    print(resource)
     params = _parse_parameter(file_path, json_parameter)
     _execute_resource(resource, params=params, output=output)
 
