@@ -131,6 +131,16 @@ def set_default_config():
     return configs
 
 
+def list_inner_resources(key, environment=None):
+    resources = get_config(key, {}, environment)
+    result = []
+
+    for inner_key, item in resources.items():
+        result.append((inner_key, item))
+
+    return result
+
+
 if __name__ == '__main__':
     set_default_config()
     # test()
