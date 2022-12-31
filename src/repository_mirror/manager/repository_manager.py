@@ -12,7 +12,7 @@ class RepositoryManager(SpaceoneClient):
         repository_id = ''
         response = self.list_repositories_from_origin(params={})
         for repository_info in response.get('results', []):
-            if repository_info['name'] == repository_type:
+            if repository_info['repository_type'] == repository_type:
                 repository_id = repository_info['repository_id']
         return repository_id
 
@@ -44,10 +44,8 @@ class RepositoryManager(SpaceoneClient):
 
 
 if __name__ == '__main__':
-    print('aaa')
     a = RepositoryManager({})
-    print(a.list_repositories_from_origin())
-    print(a.get_repository_id('Marketplace'))
-    print(a.get_repository_id('Local'))
+    print(a.get_repository_id('remote'))
+    print(a.get_repository_id('local'))
 
     # a.delete_resources_to_local_repository()
