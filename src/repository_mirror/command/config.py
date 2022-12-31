@@ -31,28 +31,6 @@ def init(environment, import_file):
 
 
 @config.command()
-@click.argument('key')
-@click.argument('value')
-def set(key, value):
-    """Set specific spaceconfig"""
-    data = get_config()
-    data[key] = value
-    set_config(data)
-
-
-@config.command()
-@click.argument('key')
-def remove(key):
-    """Remove specific repository-mirror config"""
-    data = get_config()
-
-    if key in data:
-        del data[key]
-
-    set_config(data)
-
-
-@config.command()
 @click.option('-s', '--switch', help='Switch the environment')
 @click.option('-r', '--remove', help='Remove the environment')
 def environment(switch, remove):
