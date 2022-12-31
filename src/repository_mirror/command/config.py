@@ -80,7 +80,7 @@ def environment(switch, remove):
 
         environments = list_environments()
         if len(environments) == 0:
-            raise Exception('config is undefined. (Use "spacectl config init")')
+            raise Exception('config is undefined. (Use "repository-mirror config init")')
 
         for env in environments:
             if current_env == env:
@@ -332,6 +332,12 @@ def api_key():
     pass
 
 
+@target.group()
+def spacectl():
+    """Add api_key and repository endpoint of spacectl"""
+    pass
+
+
 @endpoint.command()
 @click.argument('endpoint')
 def upsert(endpoint):
@@ -384,3 +390,40 @@ def show(output):
     """Display api_key of origin repository """
     resource_types = list_inner_resources('target')
     print_data(resource_types, output, headers=['target'])
+
+
+@spacectl.command()
+@click.argument('environment')
+def set(environment):
+    """Add a spacectl api_key"""
+    try:
+        origin_config = get_resource('target')
+    except Exception:
+        origin_config = {}
+
+    try:
+        spacectl_environment_path = os.path.join(SPACECTL_ENVIRONMENT_DIR, f'{environment}.yml')
+        data = utils.load_yaml_from_file(spacectl_environment_path)
+    except Exception:
+        raise Exception('config is undefined. (Use "spacectl config init")')
+
+    api_key_from_spacectl = data.get('api_key', '')
+    endpoint_from_spacectl = data.get('endpoints', {})
+
+    if not endpoint_from_spacectl:
+        raise Exception(f'Make sure the settings in that file are correct. ({spacectl_environment_path})')
+
+    repository_endpoint_form_spacectl = endpoint_from_spacectl.get('repository', '')
+
+    if not api_key_from_spacectl:
+        raise Exception(f'Make sure the settings in that api_key are correct. ({spacectl_environment_path})')
+    elif not repository_endpoint_form_spacectl:
+        raise Exception(
+            f'Make sure the settings in that repository endpoint are correct. ({spacectl_environment_path})')
+
+    origin_config['api_key'] = api_key_from_spacectl
+    origin_config['endpoint'] = repository_endpoint_form_spacectl
+
+    set_resource('target', origin_config)
+    click.echo(f"'spacectl api_key' has been added.")
+    click.echo(f"'{repository_endpoint_form_spacectl}' endpoint has been added.")
