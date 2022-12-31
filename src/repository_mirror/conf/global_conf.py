@@ -8,6 +8,9 @@ HOME_DIR = str(Path.home())
 CONFIG_DIR = os.path.join(HOME_DIR, '.repository-mirror')
 ENVIRONMENT_CONF_PATH = os.path.join(CONFIG_DIR, 'environment.yml')
 ENVIRONMENT_DIR = os.path.join(CONFIG_DIR, 'environments')
+SPACECTL_CONFIG_DIR = os.path.join(HOME_DIR, '.spaceone')
+SPACECTL_ENVIRONMENT_CONF_PATH = os.path.join(SPACECTL_CONFIG_DIR, 'environment.yml')
+SPACECTL_ENVIRONMENT_DIR = os.path.join(SPACECTL_CONFIG_DIR, 'environments')
 
 DEFAULT_ENVIRONMENT = 'default'
 
