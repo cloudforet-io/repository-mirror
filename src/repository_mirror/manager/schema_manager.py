@@ -8,6 +8,9 @@ class SchemaManager(SpaceoneClient):
     def create_schema_from_target(self, params):
         self.target_client().Schema.create(params, metadata=self.get_metadata())
 
+    def update_schema_from_target(self, params):
+        self.target_client().Schema.update(params, metadata=self.get_metadata())
+
     def list_schemas_from_origin(self, params):
         message = self.origin_client().Schema.list(params, metadata=self.get_metadata())
         return self.change_message(message).get('results', [])
