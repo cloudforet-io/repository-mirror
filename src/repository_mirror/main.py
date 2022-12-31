@@ -20,9 +20,12 @@ Tools used to sync the repository.\n
 Reference of repository concept:\n
 https://spaceone-dev.gitbook.io/spaceone-apis\n
 Following steps for first time user.\n
-    1. spacectl config init\n
-    2. spacectl config set api_key <api_key>\n
-    3. spacectl config endpoint add <service> <endpoint>
+    1. repository-mirror config init\n
+    2. repository-mirror config target api-key upsert <api_key>\n
+    3. repository-mirror config target endpoint upsert <endpoint>\n
+If you use spacectl's api_key and repository's endpoint\n
+    1. repository-mirror config init\n
+    2. repsoitory-mirror config target spacectl set <environment>
 """
 
 cli = click.CommandCollection(sources=[config.cli, sync.cli], help=_HELP)
