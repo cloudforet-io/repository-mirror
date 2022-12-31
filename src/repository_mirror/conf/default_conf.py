@@ -1,20 +1,20 @@
-origin = {
-    'api_key': None,  # ORIGIN_REPO_API_KEY
-    'endpoint': 'grpc+ssl://repository.portal.dev.spaceone.dev:443'  # ORIGIN_REPO_ENDPOINT (Required)
+ORIGIN = {
+    'API_KEY': None,  # ORIGIN_REPO_API_KEY
+    'ENDPOINT': 'grpc+ssl://repository.portal.dev.spaceone.dev:443'  # ORIGIN_REPO_ENDPOINT (Required)
 }
 
-target = {
-    'api_key': None,  # TARGET_REPO_API_KEY
-    'endpoint': None  # TARGET_REPO_ENDPOINT (Required)
+TARGET = {
+    'API_KEY': None,  # TARGET_REPO_API_KEY
+    'ENDPOINT': None  # TARGET_REPO_ENDPOINT (Required)
 }
 
-sync_resource_type = [
+SYNC_RESOURCE_TYPE = [
     'plugin',
     'schema',
     'policy'
 ]
 
-sync_plugins = [
+SYNC_PLUGIN = [
     # 'plugin-aws-cloud-service-inven-collector',
     # 'plugin-aws-ec2-inven-collector',
     # 'plugin-aws-phd-inven-collector',
@@ -28,13 +28,13 @@ sync_plugins = [
     # 'plugin-google-stackdriver-mon-datasource'
 ]
 
-sync_schemas = [
+SYNC_SCHEMA = [
     # 'aws_access_key',
     # 'aws_assume_role',
     # 'google_oauth2_credentials'
 ]
 
-sync_policies = [
+SYNC_POLICY = [
     # 'policy-managed-domain-admin',
     # 'policy-managed-domain-viewer'
 ]

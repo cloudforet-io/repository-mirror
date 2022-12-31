@@ -109,7 +109,7 @@ def plugin():
 def add(plugin_id):
     """Add a specific plugin"""
     try:
-        plugins = get_resource('sync_plugins')
+        plugins = get_resource('SYNC_PLUGIN')
     except Exception:
         plugins = []
 
@@ -117,7 +117,7 @@ def add(plugin_id):
         raise ValueError(f"'{plugin_id}' already exists.")
     plugins.append(plugin_id)
 
-    set_resource('sync_plugins', plugins)
+    set_resource('SYNC_PLUGIN', plugins)
     click.echo(f"'{plugin_id}' has been added.")
 
 
@@ -125,7 +125,7 @@ def add(plugin_id):
 @click.argument('plugin_id')
 def remove(plugin_id):
     """Remove a specific plugin"""
-    remove_resource('sync_plugins', plugin_id)
+    remove_resource('SYNC_PLUGIN', plugin_id)
     click.echo(f"'{plugin_id}' endpoint has been removed.")
 
 
@@ -134,8 +134,8 @@ def remove(plugin_id):
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
 def show(output):
     """Display plugins"""
-    plugins = list_resources('sync_plugins')
-    print_data(plugins, output, headers=['sync_plugins'])
+    plugins = list_resources('SYNC_PLUGIN')
+    print_data(plugins, output, headers=['sync_plugin'])
 
 
 @config.group()
@@ -149,7 +149,7 @@ def schema():
 def add(schema_name):
     """Add a specific schema"""
     try:
-        schemas = get_resource('sync_schemas')
+        schemas = get_resource('SYNC_SCHEMA')
     except Exception:
         schemas = []
 
@@ -157,7 +157,7 @@ def add(schema_name):
         raise ValueError(f"'{schema_name}' already exists.")
     schemas.append(schema_name)
 
-    set_resource('sync_schemas', schemas)
+    set_resource('SYNC_SCHEMA', schemas)
     click.echo(f"'{schema_name}' schema has been added.")
 
 
@@ -165,7 +165,7 @@ def add(schema_name):
 @click.argument('schema_name')
 def remove(schema_name):
     """Remove a specific schema"""
-    remove_resource('sync_schemas', schema_name)
+    remove_resource('SYNC_SCHEMA', schema_name)
     click.echo(f"'{schema_name}' schema has been removed.")
 
 
@@ -174,8 +174,8 @@ def remove(schema_name):
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
 def show(output):
     """Display schemas"""
-    schemas = list_resources('sync_schemas')
-    print_data(schemas, output, headers=['sync_schemas'])
+    schemas = list_resources('SYNC_SCHEMA')
+    print_data(schemas, output, headers=['sync_schema'])
 
 
 @config.group()
@@ -189,7 +189,7 @@ def policy():
 def add(policy_id):
     """Add a specific policy"""
     try:
-        policies = get_resource('sync_policies')
+        policies = get_resource('SYNC_POLICY')
     except Exception:
         policies = []
 
@@ -197,7 +197,7 @@ def add(policy_id):
         raise ValueError(f"'{policy_id}' already exists.")
     policies.append(policy_id)
 
-    set_resource('sync_policies', policies)
+    set_resource('SYNC_POLICY', policies)
     click.echo(f"'{policy_id}' policy has been added.")
 
 
@@ -205,7 +205,7 @@ def add(policy_id):
 @click.argument('policy_id')
 def remove(policy_id):
     """Remove a specific policy"""
-    remove_resource('sync_policies', policy_id)
+    remove_resource('SYNC_POLICY', policy_id)
     click.echo(f"'{policy_id}' policy has been removed.")
 
 
@@ -214,8 +214,8 @@ def remove(policy_id):
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
 def show(output):
     """Display policies"""
-    policies = list_resources('sync_policies')
-    print_data(policies, output, headers=['sync_policies'])
+    policies = list_resources('SYNC_POLICY')
+    print_data(policies, output, headers=['sync_policy'])
 
 
 @config.group()
@@ -232,7 +232,7 @@ def resource_type():
 def add(resource_type):
     """Add a specific resource_type"""
     try:
-        resource_types = get_resource('sync_resource_type')
+        resource_types = get_resource('SYNC_RESOURCE_TYPE')
     except Exception:
         resource_types = []
 
@@ -244,7 +244,7 @@ def add(resource_type):
 
     resource_types.append(resource_type)
 
-    set_resource('sync_resource_type', resource_types)
+    set_resource('SYNC_RESOURCE_TYPE', resource_types)
     click.echo(f"'{resource_type}' resource_type has been added.")
 
 
@@ -252,7 +252,7 @@ def add(resource_type):
 @click.argument('resource_type')
 def remove(resource_type):
     """Remove a specific resource_type"""
-    remove_resource('sync_resource_type', resource_type)
+    remove_resource('SYNC_RESOURCE_TYPE', resource_type)
     click.echo(f"'{resource_type}' resource_type has been removed.")
 
 
@@ -261,7 +261,7 @@ def remove(resource_type):
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
 def show(output):
     """Display resource_types"""
-    resource_types = list_resources('sync_resource_type')
+    resource_types = list_resources('SYNC_RESOURCE_TYPE')
     print_data(resource_types, output, headers=['sync_resource_type'])
 
 
@@ -286,16 +286,16 @@ def endpoint():
 def upsert(endpoint):
     """Add a specific endpoint"""
     try:
-        origin_config = get_resource('origin')
+        origin_config = get_resource('ORIGIN')
     except Exception:
         origin_config = {}
 
-    if endpoint == origin_config['endpoint']:
+    if endpoint == origin_config['ENDPOINT']:
         raise ValueError(f"'{endpoint}' already exists.")
 
-    origin_config['endpoint'] = endpoint
+    origin_config['ENDPOINT'] = endpoint
 
-    set_resource('origin', origin_config)
+    set_resource('ORIGIN', origin_config)
     click.echo(f"'{endpoint}' endpoint has been added.")
 
 
@@ -304,7 +304,7 @@ def upsert(endpoint):
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
 def show(output):
     """Display endpoint of origin repository """
-    resource_types = list_inner_resources('origin')
+    resource_types = list_inner_resources('ORIGIN')
     print_data(resource_types, output, headers=['origin'])
 
 
@@ -343,16 +343,16 @@ def spacectl():
 def upsert(endpoint):
     """Add a specific endpoint"""
     try:
-        origin_config = get_resource('target')
+        origin_config = get_resource('TARGET')
     except Exception:
         origin_config = {}
 
-    if endpoint == origin_config['endpoint']:
+    if endpoint == origin_config['ENDPOINT']:
         raise ValueError(f"'{endpoint}' already exists.")
 
-    origin_config['endpoint'] = endpoint
+    origin_config['ENDPOINT'] = endpoint
 
-    set_resource('target', origin_config)
+    set_resource('TARGET', origin_config)
     click.echo(f"'{endpoint}' endpoint has been added.")
 
 
@@ -361,7 +361,7 @@ def upsert(endpoint):
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
 def show(output):
     """Display endpoint of origin repository """
-    resource_types = list_inner_resources('target')
+    resource_types = list_inner_resources('TARGET')
     print_data(resource_types, output, headers=['target'])
 
 
@@ -370,16 +370,16 @@ def show(output):
 def upsert(api_key):
     """Add a specific api_key"""
     try:
-        origin_config = get_resource('target')
+        origin_config = get_resource('TARGET')
     except Exception:
         origin_config = {}
 
-    if api_key == origin_config['api_key']:
+    if api_key == origin_config['API_KEY']:
         raise ValueError(f"'{api_key}' already exists.")
 
-    origin_config['api_key'] = api_key
+    origin_config['API_KEY'] = api_key
 
-    set_resource('target', origin_config)
+    set_resource('TARGET', origin_config)
     click.echo(f"'{api_key}' api_key has been added.")
 
 
@@ -388,7 +388,7 @@ def upsert(api_key):
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
 def show(output):
     """Display api_key of origin repository """
-    resource_types = list_inner_resources('target')
+    resource_types = list_inner_resources('TARGET')
     print_data(resource_types, output, headers=['target'])
 
 
@@ -397,7 +397,7 @@ def show(output):
 def set(environment):
     """Add a spacectl api_key"""
     try:
-        origin_config = get_resource('target')
+        origin_config = get_resource('TARGET')
     except Exception:
         origin_config = {}
 
@@ -421,9 +421,9 @@ def set(environment):
         raise Exception(
             f'Make sure the settings in that repository endpoint are correct. ({spacectl_environment_path})')
 
-    origin_config['api_key'] = api_key_from_spacectl
-    origin_config['endpoint'] = repository_endpoint_form_spacectl
+    origin_config['API_KEY'] = api_key_from_spacectl
+    origin_config['ENDPOINT'] = repository_endpoint_form_spacectl
 
-    set_resource('target', origin_config)
+    set_resource('TARGET', origin_config)
     click.echo(f"'spacectl api_key' has been added.")
     click.echo(f"'{repository_endpoint_form_spacectl}' endpoint has been added.")
