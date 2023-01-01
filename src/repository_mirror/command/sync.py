@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import click
+import copy
 from spaceone.core.utils import load_yaml_from_file, load_json
 from repository_mirror.conf.default_conf import *
 from repository_mirror.conf.my_conf import *
+from repository_mirror.lib.output import echo
 from repository_mirror.manager.plugin_manager import PluginManager
 from repository_mirror.manager.schema_manager import SchemaManager
 from repository_mirror.manager.policy_manager import PolicyManager
@@ -53,43 +55,93 @@ def sync(json_parameter, file_path, parameter, output):
             schema_names_to_be_created = _create_match_key_to_be_created(origin_schema_names, target_schema_names)
 
             if sync_schemas:
-                for schema_name in schema_names_to_be_updated:
-                    if schema_name not in sync_schemas:
-                        schema_names_to_be_updated.remove(schema_name)
+                echo(f'[SYNC] SYNC_SCHEMA is set. ({sync_schemas})')
+                schema_names_to_be_updated = _select_resources_from_sync_resource(schema_names_to_be_updated,
+                                                                                  sync_schemas)
+                schema_names_to_be_created = _select_resources_from_sync_resource(schema_names_to_be_created,
+                                                                                  sync_schemas)
+            else:
+                echo(f"[SYNC] SYNC_SCHEMA is not set. Sync the entire schemas of ORIGIN.")
 
-                for schema_name in schema_names_to_be_created:
-                    if schema_name not in sync_schemas:
-                        schema_names_to_be_updated.remove(schema_name)
+            schema_update_checklist = ['schema', 'labels', 'tags']
+            schema_create_checklist = ['name', 'schema', 'service_type', 'labels', 'tags']
 
-            check_update_params = ['name', 'schema', 'labels', 'tags']
-            check_create_params = ['name', 'schema', 'service_type', 'labels', 'tags']
+            update_schema_params = []
+            create_schema_params = []
+            if schema_names_to_be_updated:
+                update_schema_params = _get_update_params_from_matched_resources(
+                    primary_keys_to_be_updated=schema_names_to_be_updated,
+                    origin_resources=origin_schemas,
+                    target_resources=target_schemas,
+                    update_checklist=schema_update_checklist,
+                    match_key='name')
 
-            update_params_items = []
-            for schema_name in schema_names_to_be_updated:
-                origin_schema = [origin_schema for origin_schema in origin_schemas
-                                 if origin_schema['name'] == schema_name]
-                target_schema = [target_schema for target_schema in target_schemas
-                                 if target_schema['name'] == schema_name]
+                for params in update_schema_params:
+                    schema_manager.update_schema_from_target(params)
+                    echo(f"[SYNC] {params['name']} has been updated.(update field:{list(params.keys())})")
 
-                params = {'name': schema_name}
-                for update_param in check_update_params:
-                    if origin_schema[0][update_param] != target_schema[0][update_param]:
-                        params.update({update_param: origin_schema[0][update_param]})
-                if len(params.keys()) > 1:
-                    update_params_items.append(params)
+            if schema_names_to_be_created:
+                create_schema_params = _get_create_params_from_matched_resources(
+                    primary_keys_to_be_created=schema_names_to_be_created, origin_resources=origin_schemas,
+                    create_checklist=schema_create_checklist, match_key='name')
 
-            for params in update_params_items:
-                schema_manager.update_schema_from_target(params)
-
-            for origin_schema in origin_schemas:
-                if origin_schema['name'] in schema_names_to_be_created:
-                    params = {}
-                    for parameter in check_create_params:
-                        params.update({parameter: origin_schema[parameter]})
+                for params in create_schema_params:
                     schema_manager.create_schema_from_target(params)
+                    echo(f"[SYNC] {params['name']} has been created.")
+
+            echo(f"[SYNC][RESULT] {len(update_schema_params)} schemas has been updated.")
+            echo(f"[SYNC][RESULT] {len(create_schema_params)} schemas has been created.")
+            echo(f"[SYNC][RESULT] ORIGIN has {len(origin_schemas)} schemas.")
+            echo(f"[SYNC][RESULT] TARGET has {len(target_schemas) + len(create_schema_params)} schemas.")
 
         if resource_type == 'policy':
             policy_manager = PolicyManager(config)
+            origin_polices = policy_manager.list_policies_from_origin({'repository_id': origin_repository_id})
+            target_polices = policy_manager.list_policies_from_target({'repository_id': target_repository_id})
+            origin_policy_ids = [policy['policy_id'] for policy in origin_polices]
+            target_policy_ids = [policy['policy_id'] for policy in target_polices]
+            policy_ids_to_be_updated = _create_match_key_to_be_updated(origin_policy_ids, target_policy_ids)
+            policy_ids_to_be_created = _create_match_key_to_be_created(origin_policy_ids, target_policy_ids)
+
+            if sync_policies:
+                echo(f'[SYNC] SYNC_POLICY is set. ({sync_policies})')
+                policy_ids_to_be_updated = _select_resources_from_sync_resource(policy_ids_to_be_updated,
+                                                                                  sync_policies)
+                policy_ids_to_be_created = _select_resources_from_sync_resource(policy_ids_to_be_created,
+                                                                                  sync_policies)
+            else:
+                echo(f"[SYNC] SYNC_POLICY is not set. Sync the entire policies of ORIGIN.")
+
+            policy_update_checklist = ['name', 'permissions', 'labels', 'tags']
+            policy_create_checklist = ['policy_id', 'name', 'permissions', 'labels', 'tags']
+
+            update_policy_params = []
+            create_policy_params = []
+            if policy_ids_to_be_updated:
+                update_policy_params = _get_update_params_from_matched_resources(
+                    primary_keys_to_be_updated=policy_ids_to_be_updated,
+                    origin_resources=origin_polices,
+                    target_resources=target_polices,
+                    update_checklist=policy_update_checklist,
+                    match_key='policy_id')
+
+                for params in update_policy_params:
+                    policy_manager.update_policy_from_target(params)
+                    echo(f"[SYNC] {params['policy_id']} has been updated.(update field:{list(params.keys())})")
+
+            if policy_ids_to_be_created:
+                create_policy_params = _get_create_params_from_matched_resources(
+                    primary_keys_to_be_created=policy_ids_to_be_created, origin_resources=origin_polices,
+                    create_checklist=policy_create_checklist, match_key='policy_id')
+
+                for params in create_policy_params:
+                    policy_manager.create_policy_from_target(params)
+                    echo(f"[SYNC] {params['policy_id']} has been created.")
+
+            echo(f"[SYNC][RESULT] {len(update_policy_params)} policies has been updated.")
+            echo(f"[SYNC][RESULT] {len(create_policy_params)} policies has been created.")
+            echo(f"[SYNC][RESULT] ORIGIN has {len(origin_polices)} polices.")
+            echo(f"[SYNC][RESULT] TARGET has {len(target_polices) + len(create_policy_params)} policies.")
 
         if resource_type == 'plugin':
             plugin_manager = PluginManager(config)
@@ -152,6 +204,44 @@ def _create_match_key_to_be_updated(origin_items, target_items):
 
 def _create_match_key_to_be_created(origin_items, target_items):
     return list(set(origin_items) - set(target_items))
+
+
+def _select_resources_from_sync_resource(primary_key_resources, sync_resources):
+    key_resources = copy.deepcopy(primary_key_resources)
+    for key_resource in primary_key_resources:
+        if key_resource not in sync_resources:
+            key_resources.remove(key_resource)
+    return key_resources
+
+
+def _get_update_params_from_matched_resources(primary_keys_to_be_updated, origin_resources, target_resources,
+                                              update_checklist, match_key):
+    update_params_items = []
+    for primary_key in primary_keys_to_be_updated:
+        matched_origin_resource = [origin_resource for origin_resource in origin_resources
+                                   if origin_resource[match_key] == primary_key]
+        matched_target_resource = [target_resource for target_resource in target_resources
+                                   if target_resource[match_key] == primary_key]
+
+        params = {match_key: primary_key}
+        for update_param in update_checklist:
+            if matched_origin_resource[0][update_param] != matched_target_resource[0][update_param]:
+                params.update({update_param: matched_origin_resource[0][update_param]})
+        if len(params.keys()) > 1:
+            update_params_items.append(params)
+    return update_params_items
+
+
+def _get_create_params_from_matched_resources(primary_keys_to_be_created, origin_resources, create_checklist,
+                                              match_key):
+    update_params = []
+    for origin_schema in origin_resources:
+        if origin_schema[match_key] in primary_keys_to_be_created:
+            params = {}
+            for parameter in create_checklist:
+                params.update({parameter: origin_schema[parameter]})
+            update_params.append(params)
+    return update_params
 
 
 if __name__ == '__main__':
