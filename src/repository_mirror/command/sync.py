@@ -55,12 +55,15 @@ def sync(json_parameter, file_path, parameter, output):
             schema_names_to_be_created = _create_match_key_to_be_created(origin_schema_names, target_schema_names)
 
             if sync_schemas:
+                echo(f'[SYNC] SYNC_SCHEMA is set. ({sync_schemas})')
                 schema_names_to_be_updated = _select_resources_from_sync_resource(schema_names_to_be_updated,
                                                                                   sync_schemas)
                 schema_names_to_be_created = _select_resources_from_sync_resource(schema_names_to_be_created,
                                                                                   sync_schemas)
+            else:
+                echo(f"[SYNC] SYNC_SCHEMA is not set. Sync the entire schemas of ORIGIN.")
 
-            schema_update_checklist = ['name', 'schema', 'labels', 'tags']
+            schema_update_checklist = ['schema', 'labels', 'tags']
             schema_create_checklist = ['name', 'schema', 'service_type', 'labels', 'tags']
 
             update_schema_params = []
@@ -93,6 +96,52 @@ def sync(json_parameter, file_path, parameter, output):
 
         if resource_type == 'policy':
             policy_manager = PolicyManager(config)
+            origin_polices = policy_manager.list_policies_from_origin({'repository_id': origin_repository_id})
+            target_polices = policy_manager.list_policies_from_target({'repository_id': target_repository_id})
+            origin_policy_ids = [policy['policy_id'] for policy in origin_polices]
+            target_policy_ids = [policy['policy_id'] for policy in target_polices]
+            policy_ids_to_be_updated = _create_match_key_to_be_updated(origin_policy_ids, target_policy_ids)
+            policy_ids_to_be_created = _create_match_key_to_be_created(origin_policy_ids, target_policy_ids)
+
+            if sync_policies:
+                echo(f'[SYNC] SYNC_POLICY is set. ({sync_policies})')
+                policy_ids_to_be_updated = _select_resources_from_sync_resource(policy_ids_to_be_updated,
+                                                                                  sync_policies)
+                policy_ids_to_be_created = _select_resources_from_sync_resource(policy_ids_to_be_created,
+                                                                                  sync_policies)
+            else:
+                echo(f"[SYNC] SYNC_POLICY is not set. Sync the entire policies of ORIGIN.")
+
+            policy_update_checklist = ['name', 'permissions', 'labels', 'tags']
+            policy_create_checklist = ['policy_id', 'name', 'permissions', 'labels', 'tags']
+
+            update_policy_params = []
+            create_policy_params = []
+            if policy_ids_to_be_updated:
+                update_policy_params = _get_update_params_from_matched_resources(
+                    primary_keys_to_be_updated=policy_ids_to_be_updated,
+                    origin_resources=origin_polices,
+                    target_resources=target_polices,
+                    update_checklist=policy_update_checklist,
+                    match_key='policy_id')
+
+                for params in update_policy_params:
+                    policy_manager.update_policy_from_target(params)
+                    echo(f"[SYNC] {params['policy_id']} has been updated.(update field:{list(params.keys())})")
+
+            if policy_ids_to_be_created:
+                create_policy_params = _get_create_params_from_matched_resources(
+                    primary_keys_to_be_created=policy_ids_to_be_created, origin_resources=origin_polices,
+                    create_checklist=policy_create_checklist, match_key='policy_id')
+
+                for params in create_policy_params:
+                    policy_manager.create_policy_from_target(params)
+                    echo(f"[SYNC] {params['policy_id']} has been created.")
+
+            echo(f"[SYNC][RESULT] {len(update_policy_params)} policies has been updated.")
+            echo(f"[SYNC][RESULT] {len(create_policy_params)} policies has been created.")
+            echo(f"[SYNC][RESULT] ORIGIN has {len(origin_polices)} polices.")
+            echo(f"[SYNC][RESULT] TARGET has {len(target_polices) + len(create_policy_params)} policies.")
 
         if resource_type == 'plugin':
             plugin_manager = PluginManager(config)

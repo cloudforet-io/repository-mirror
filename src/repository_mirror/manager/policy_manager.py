@@ -8,6 +8,9 @@ class PolicyManager(SpaceoneClient):
     def create_policy_from_target(self, params):
         self.target_client().Policy.create(params, metadata=self.get_metadata())
 
+    def update_policy_from_target(self, params):
+        self.target_client().Policy.update(params, metadata=self.get_metadata())
+
     def list_policies_from_origin(self, params):
         message = self.origin_client().Policy.list(params, metadata=self.get_metadata())
         return self.change_message(message).get('results', [])
