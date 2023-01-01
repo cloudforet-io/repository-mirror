@@ -106,9 +106,9 @@ def sync(json_parameter, file_path, parameter, output):
             if sync_policies:
                 echo(f'[SYNC] SYNC_POLICY is set. ({sync_policies})')
                 policy_ids_to_be_updated = _select_resources_from_sync_resource(policy_ids_to_be_updated,
-                                                                                  sync_policies)
+                                                                                sync_policies)
                 policy_ids_to_be_created = _select_resources_from_sync_resource(policy_ids_to_be_created,
-                                                                                  sync_policies)
+                                                                                sync_policies)
             else:
                 echo(f"[SYNC] SYNC_POLICY is not set. Sync the entire policies of ORIGIN.")
 
@@ -145,6 +145,55 @@ def sync(json_parameter, file_path, parameter, output):
 
         if resource_type == 'plugin':
             plugin_manager = PluginManager(config)
+            origin_plugins = plugin_manager.list_plugins_from_origin({'repository_id': origin_repository_id})
+            target_plugins = plugin_manager.list_plugins_from_target({'repository_id': target_repository_id})
+            origin_plugin_images = [plugin['image'] for plugin in origin_plugins]
+            target_plugin_images = [plugin['image'] for plugin in target_plugins]
+            plugin_images_to_be_updated = _create_match_key_to_be_updated(origin_plugin_images, target_plugin_images)
+            plugin_images_to_be_created = _create_match_key_to_be_created(origin_plugin_images, target_plugin_images)
+
+            if sync_plugins:
+                image_repo = 'pyengine'
+                echo(f'[SYNC] SYNC_PLUGIN is set. ({sync_plugins})')
+                sync_plugins = list(map(lambda x: image_repo + '/' + x, sync_plugins))
+                plugin_images_to_be_updated = _select_resources_from_sync_resource(plugin_images_to_be_updated,
+                                                                                   sync_plugins)
+                plugin_images_to_be_created = _select_resources_from_sync_resource(plugin_images_to_be_created,
+                                                                                   sync_plugins)
+            else:
+                echo(f"[SYNC] SYNC_PLUGIN is not set. Sync the entire plugins of ORIGIN.")
+
+            plugin_update_checklist = ['name', 'capability', 'template', 'labels', 'tags']
+            plugin_create_checklist = ['name', 'capability', 'template', 'registry_type',
+                                       'service_type', 'provider', 'image', 'tags', 'labels']
+
+            update_plugin_params = []
+            create_plugin_params = []
+            if plugin_images_to_be_updated:
+                update_plugin_params = _get_update_params_from_matched_resources(
+                    primary_keys_to_be_updated=plugin_images_to_be_updated,
+                    origin_resources=origin_plugins,
+                    target_resources=target_plugins,
+                    update_checklist=plugin_update_checklist,
+                    match_key='image')
+
+                for params in update_plugin_params:
+                    plugin_manager.update_plugin_from_target(params)
+                    echo(f"[SYNC] {params['name']} has been updated.(update field:{list(params.keys())})")
+
+            if plugin_images_to_be_created:
+                create_plugin_params = _get_create_params_from_matched_resources(
+                    primary_keys_to_be_created=plugin_images_to_be_created, origin_resources=origin_plugins,
+                    create_checklist=plugin_create_checklist, match_key='image')
+
+                for params in create_plugin_params:
+                    plugin_manager.register_plugin_from_target(params)
+                    echo(f"[SYNC] {params['name']} has been created.")
+
+            echo(f"[SYNC][RESULT] {len(update_plugin_params)} plugins has been updated.")
+            echo(f"[SYNC][RESULT] {len(create_plugin_params)} plugins has been created.")
+            echo(f"[SYNC][RESULT] ORIGIN has {len(origin_plugins)} plugins.")
+            echo(f"[SYNC][RESULT] TARGET has {len(target_plugins) + len(create_plugin_params)} plugins.")
 
 
 def _get_config_from_external(file_parameter=None, json_parameter=None, parameter=None):
@@ -215,15 +264,18 @@ def _select_resources_from_sync_resource(primary_key_resources, sync_resources):
 
 
 def _get_update_params_from_matched_resources(primary_keys_to_be_updated, origin_resources, target_resources,
-                                              update_checklist, match_key):
+                                              update_checklist, match_key, plugin=False):
     update_params_items = []
     for primary_key in primary_keys_to_be_updated:
         matched_origin_resource = [origin_resource for origin_resource in origin_resources
                                    if origin_resource[match_key] == primary_key]
         matched_target_resource = [target_resource for target_resource in target_resources
                                    if target_resource[match_key] == primary_key]
+        if not plugin:
+            params = {match_key: primary_key}
+        else:
+            params = {}
 
-        params = {match_key: primary_key}
         for update_param in update_checklist:
             if matched_origin_resource[0][update_param] != matched_target_resource[0][update_param]:
                 params.update({update_param: matched_origin_resource[0][update_param]})
