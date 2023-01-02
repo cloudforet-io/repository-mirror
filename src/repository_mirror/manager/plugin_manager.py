@@ -21,19 +21,3 @@ class PluginManager(SpaceoneClient):
 
     def delete_plugin_from_target(self, params):
         self.target_client().Plugin.deregister(params, metadata=self.get_metadata())
-
-
-if __name__ == '__main__':
-    a = PluginManager({})
-    params = {'repository_id': 'repo-f42c8b88ee2b'}
-    print(a.list_plugins_from_origin(params))
-    print(len(a.list_plugins_from_origin(params)))
-    params = {'repository_id': 'repo-d9e115714edc'}
-    print(a.list_plugins_from_target(params))
-    print(len(a.list_plugins_from_target(params)))
-
-    params = {'repository_id': 'repo-f42c8b88ee2b'}
-    print(a.list_plugins_from_target(params))
-    print(len(a.list_plugins_from_target(params)))
-
-    a.register_plugin_from_target({})

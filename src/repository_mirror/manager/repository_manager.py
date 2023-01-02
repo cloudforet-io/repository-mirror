@@ -23,13 +23,12 @@ class RepositoryManager(SpaceoneClient):
     def delete_resources_to_local_repository(self):
         """method for testing"""
 
-        repository_id = self.get_repository_id('Local')
+        repository_id = self.get_repository_id('local')
         params = {'repository_id': repository_id}
 
         schema_manager = SchemaManager({})
         # policy_manager = PolicyManager({})
         plugin_manager = PluginManager({})
-
         schemas = schema_manager.list_schemas_from_target(params=params)
         for schema in schemas:
             schema_manager.delete_schema_from_target(params={'name': schema['name']})
@@ -44,8 +43,7 @@ class RepositoryManager(SpaceoneClient):
 
 
 if __name__ == '__main__':
-    a = RepositoryManager({})
-    print(a.get_repository_id('remote'))
-    print(a.get_repository_id('local'))
-
-    # a.delete_resources_to_local_repository()
+    # test of remove all resources in TARGET
+    repository_mgr = RepositoryManager({})
+    print(repository_mgr.get_repository_id('local'))
+    repository_mgr.delete_resources_to_local_repository()
