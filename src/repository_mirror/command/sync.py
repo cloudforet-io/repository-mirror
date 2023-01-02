@@ -25,7 +25,7 @@ def cli():
 @click.option('-o', '--output', default='yaml', help='Output format',
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
 def sync(json_parameter, file_path, parameter, output):
-    """Execute a method to resource"""
+    """Synchronize TARGET with ORIGIN's repsitory' resources."""
     config = _get_config_from_external(file_path, json_parameter, parameter)
 
     if not config:
@@ -287,11 +287,12 @@ def _get_update_params_from_matched_resources(primary_keys_to_be_updated, origin
 def _get_create_params_from_matched_resources(primary_keys_to_be_created, origin_resources, create_checklist,
                                               match_key):
     update_params = []
-    for origin_schema in origin_resources:
-        if origin_schema[match_key] in primary_keys_to_be_created:
+    for origin_resource in origin_resources:
+        if origin_resource[match_key] in primary_keys_to_be_created:
             params = {}
             for parameter in create_checklist:
-                params.update({parameter: origin_schema[parameter]})
+                if parameter in origin_resource.keys():
+                    params.update({parameter: origin_resource[parameter]})
             update_params.append(params)
     return update_params
 
